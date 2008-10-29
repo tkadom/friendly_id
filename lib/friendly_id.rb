@@ -199,12 +199,10 @@ module Randomba
       # Generate the text for the friendly id, ensuring no duplication.
       def generate_friendly_id
         slug_text = truncated_friendly_id_base
-        count = Slug.count_matches(slug_text, self.class.to_s, :all,
-        :conditions => "sluggable_id <> #{self.id or 0}")
-        if count == 0
+        if !Slug.find_by_name(slug_text)
           return slug_text
         else
-          generate_friendly_id_with_extension(slug_text, count)
+          generate_friendly_id_with_extension(slug_text)
         end
       end
 
@@ -256,20 +254,16 @@ module Randomba
       # extension is added.
       NUM_CHARS_RESERVED_FOR_EXTENSION = 5
 
-      def generate_friendly_id_with_extension(slug_text, count)
-        extension = "-" + (count + 1).to_s
-        if extension.length > NUM_CHARS_RESERVED_FOR_EXTENSION
-          raise FriendlyId::SlugGenerationError.new("slug text #{slug_text} " +
-            "goes over limit for similarly named slugs")
-        end
+      def generate_friendly_id_with_extension(slug_text)
+        start = 0
+        extension = "-" + (start + 1).to_s
         slug_text = truncated_friendly_id_base + extension
-        count = Slug.count_matches(slug_text, self.class.to_s, :all,
-          :conditions => "sluggable_id <> #{self.id or 0}")
-        if count != 0
-          slug_text = truncated_friendly_id_base + "-" + (count + 1).to_s
-        else
-          return slug_text
+        while Slug.find_by_name(slug_text)
+          start = start + 1
+          extension = "-" + (start + 1).to_s
+          slug_text = truncated_friendly_id_base + extension
         end
+        return slug_text
       end
     end
 

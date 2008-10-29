@@ -14,7 +14,7 @@ namespace :friendly_id do
     	records.each do |r|
       	   r.set_slug
            r.save!
-           puts "#{sluggable_class.to_s}(#{r.id}) friendly_id set to \"#{r.slug.name}\""
+           puts "#{sluggable_class.to_s}(#{r.id}) friendly_id set to \"#{r.slug.name}\""  
 	end
       end
     end
